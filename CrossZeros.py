@@ -14,7 +14,7 @@ class CrossZerosGUI:
         self.create_mode_selection_widgets()
         self.root.resizable(width=False, height=False)  # Отключение изменения размеров окна
 
-
+    # Создание виджетов для выбора режима игры
     def create_mode_selection_widgets(self):
         mode_label = tk.Label(self.root, text="Выберите режим игры:")
         mode_label.grid(row=0, column=0, columnspan=2)
@@ -25,6 +25,7 @@ class CrossZerosGUI:
         human_vs_computer_button = tk.Button(self.root, text="Человек против компьютера", command=lambda: self.start_game("human_vs_computer"))
         human_vs_computer_button.grid(row=1, column=1, padx=5, pady=5)
 
+    # Начало игры с выбранным режимом
     def start_game(self, mode):
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -33,6 +34,7 @@ class CrossZerosGUI:
         self.game_session = CrossZeros(min(10, self.max_field_size), self, mode)
         self.create_game_widgets()
 
+    # Создание виджетов для игрового поля
     def create_game_widgets(self):
         button_width = 3
         button_height = 3
@@ -44,6 +46,7 @@ class CrossZerosGUI:
                 btn.grid(row=i, column=j)
                 self.buttons[i][j] = btn
 
+    # Обработка клика по кнопке на игровом поле
     def on_button_click(self, row, col):
         if self.game_session.winner is not None:
             return  # Игра завершена, клики не обрабатываются
@@ -58,6 +61,7 @@ class CrossZerosGUI:
                 self.game_step(row, col)
                 self.root.after(500, self.computer_move)
 
+    # Выполнение хода в игре
     def game_step(self, row, col):
         if not self.game_session.game_step(row, col):
             self.update_gui()
@@ -67,6 +71,7 @@ class CrossZerosGUI:
                 self.root.after(500, lambda: self.show_winner_message(winner_symbol))
                 self.disable_buttons()
 
+    # Обновление интерфейса
     def update_gui(self):
         for i in range(self.game_session.field_size):
             for j in range(self.game_session.field_size):
@@ -76,14 +81,17 @@ class CrossZerosGUI:
                     color = "red" if symbol == 1 else "black"  # Красный цвет для крестика, черный для нолика
                     self.buttons[i][j].config(text=text, fg=color)
 
+    # Показ сообщения о победителе
     def show_winner_message(self, winner_symbol):
         messagebox.showinfo("Игра окончена", f"Игрок {winner_symbol} победил!")
 
+    # Отключение кнопок после завершения игры
     def disable_buttons(self):
         for i in range(self.game_session.field_size):
             for j in range(self.game_session.field_size):
                 self.buttons[i][j].config(state=tk.DISABLED)
 
+    # Ход компьютера
     def computer_move(self):
         if self.game_session.winner is not None:
             return
@@ -107,6 +115,7 @@ class CrossZeros(object):
         self.mode = mode
         self.max_field_size = 14  # Максимальный размер поля
 
+    # Выполнение хода в игре
     def game_step(self, row, col):
         if self.winner is not None:
             return False  # Игра уже завершена, запрещены новые ходы
@@ -126,6 +135,7 @@ class CrossZeros(object):
         if self.win_condition():
             return False  # Если есть победитель, запрещены новые ходы
 
+    # Расширение игрового поля при необходимости
     def field_expansion(self, row, col):
         expansion_condition = 3  # Количество ячеек до границы
         max_field_size = self.max_field_size
@@ -135,7 +145,7 @@ class CrossZeros(object):
         upper_distance = row
         left_distance = col
 
-        # Рассматриваем различные сценарии для расширения поля
+        # Различные сценарии для расширения поля
         bottom_distance = min(bottom_distance, expansion_condition)
         right_distance = min(right_distance, expansion_condition)
         upper_distance = min(upper_distance, expansion_condition)
@@ -178,6 +188,7 @@ class CrossZeros(object):
             else:
                 self.zero(row, col)
 
+    # Постановка крестика
     def cross(self, row, col):
         if all(0 <= i < self.field_size for i in [row, col]):
             if self.field[row][col] is None:
@@ -188,6 +199,7 @@ class CrossZeros(object):
                 return 1
         return 0
 
+    # Постановка нолика
     def zero(self, row, col):
         if all(0 <= i < self.field_size for i in [row, col]):
             if self.field[row][col] is None:
@@ -198,6 +210,7 @@ class CrossZeros(object):
                 return 1
         return 0
 
+    # Проверка условия победы
     def win_condition(self):
         for i in range(self.field_size):
             for j in range(self.field_size):
@@ -212,6 +225,7 @@ class CrossZeros(object):
                     return True
         return False
 
+    # Ход компьютера
     def computer_move(self):
         available_moves = [(i, j) for i in range(self.field_size) for j in range(self.field_size) if
                            self.field[i][j] is None]
